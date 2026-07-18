@@ -66,10 +66,16 @@ jobs:
       - name: build
         run: go build ./...
 
-  # The benchmark bot auto-merges its PR, so enforce that such a PR only ever
-  # touches result data + the README — never code, workflows, or config. If a
-  # buggy or tampered run writes elsewhere, this fails the required check and
-  # blocks the auto-merge.
+  # The benchmark bot auto-merges its PR (branch bench/auto-results), so enforce
+  # that such a PR only ever touches result data + the README — never code,
+  # workflows, or config. This is a REQUIRED check, so a buggy/tampered run that
+  # writes elsewhere fails it and cannot auto-merge.
+  #
+  # The branch name is not a trust boundary on its own (anyone could name a
+  # branch bench/auto-results). That case is covered by branch protection:
+  # non-bot PRs require a human approval (required_approving_review_count >= 1),
+  # so a spoofed data-only PR still cannot merge without review. This job's role
+  # is purely to constrain the AUTO-merged bot path to data.
   bot-pr-is-data-only:
     if: github.event_name == 'pull_request' && github.head_ref == 'bench/auto-results'
     runs-on: ubuntu-latest
@@ -82,10 +88,16 @@ jobs:
           BASE: ${{ github.event.pull_request.base.sha }}
           HEAD: ${{ github.event.pull_request.head.sha }}
         run: |
+          set -euo pipefail
           changed=$(git diff --name-only "$BASE" "$HEAD")
           echo "Changed files:"; echo "$changed"
-          bad=$(echo "$changed" | grep -vE '^(benchmarks/results/|README\.md$)' || true)
-          if [ -n "$bad" ]; then
-            echo "::error::benchmark PR modified non-data files:"; echo "$bad"; exit 1
+          # Fail closed: an empty diff on a bot PR is anomalous, not "clean".
+          if [ -z "$changed" ]; then
+            echo "::error::benchmark PR has no file changes — refusing."; exit 1
+          fi
+          # Every changed path must be result data or the README; any other
+          # path fails the check (grep -v matching a bad line exits 0).
+          if echo "$changed" | grep -vE '^(benchmarks/results/|README\.md$)'; then
+            echo "::error::benchmark PR modified non-data files (listed above)."; exit 1
           fi
           echo "OK — data-only."

@@ -5,6 +5,7 @@ package bench
 import (
 	"fmt"
 	"os"
+	"regexp"
 
 	"gopkg.in/yaml.v3"
 )
@@ -94,6 +95,12 @@ func LoadConfig(path string) (*Config, error) {
 	return &cfg, nil
 }
 
+// safeName restricts provider ids and model names to a conservative charset.
+// These strings are rendered verbatim into the PUBLIC README markdown table and
+// into JSON results, so we forbid anything that could break the table (|,
+// newlines), inject markup (<, >, backtick), or corrupt the render markers.
+var safeName = regexp.MustCompile(`^[A-Za-z0-9._/:\- ]+$`)
+
 func (c *Config) validate() error {
 	if c.Defaults.MeasuredRuns < 1 {
 		return fmt.Errorf("defaults.measured_runs must be >= 1")
@@ -101,13 +108,16 @@ func (c *Config) validate() error {
 	if c.Defaults.MaxTokens < 1 {
 		return fmt.Errorf("defaults.max_tokens must be >= 1")
 	}
+	if c.Defaults.TimeoutSeconds < 1 {
+		return fmt.Errorf("defaults.timeout_seconds must be >= 1")
+	}
 	if len(c.Providers) == 0 {
 		return fmt.Errorf("no providers defined")
 	}
 	seen := map[string]bool{}
 	for _, p := range c.Providers {
-		if p.ID == "" {
-			return fmt.Errorf("provider with empty id")
+		if !safeName.MatchString(p.ID) {
+			return fmt.Errorf("provider id %q contains disallowed characters", p.ID)
 		}
 		if p.BaseURL == "" {
 			return fmt.Errorf("provider %q: empty base_url", p.ID)
@@ -119,6 +129,9 @@ func (c *Config) validate() error {
 			return fmt.Errorf("provider %q: no models", p.ID)
 		}
 		for _, m := range p.Models {
+			if !safeName.MatchString(m.Name) {
+				return fmt.Errorf("model name %q contains disallowed characters", m.Name)
+			}
 			key := p.ID + "/" + m.Name
 			if seen[key] {
 				return fmt.Errorf("duplicate model %q", key)

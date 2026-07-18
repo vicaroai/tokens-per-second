@@ -35,7 +35,7 @@ func newAnthropic(id, baseURL, apiKey string) (Client, error) {
 		id:      id,
 		baseURL: strings.TrimRight(baseURL, "/"),
 		apiKey:  apiKey,
-		http:    &http.Client{Timeout: 3 * time.Minute},
+		http:    &http.Client{Timeout: 3 * time.Minute, CheckRedirect: noCrossHostRedirect},
 	}, nil
 }
 
@@ -113,7 +113,7 @@ func (c *anthropic) Stream(ctx context.Context, req Request) (StreamResult, erro
 		res      StreamResult
 		gotFirst bool
 	)
-	sc := bufio.NewScanner(resp.Body)
+	sc := bufio.NewScanner(io.LimitReader(resp.Body, maxStreamBytes))
 	sc.Buffer(make([]byte, 0, 64*1024), 1024*1024)
 	for sc.Scan() {
 		line := sc.Text()

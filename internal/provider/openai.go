@@ -38,8 +38,9 @@ func newOpenAICompatible(id, baseURL, apiKey string) (Client, error) {
 		baseURL: strings.TrimRight(baseURL, "/"),
 		apiKey:  apiKey,
 		// A generous client-level timeout backstops the per-call context so a
-		// stalled connection can't hang a run indefinitely.
-		http: &http.Client{Timeout: 3 * time.Minute},
+		// stalled connection can't hang a run indefinitely. CheckRedirect stops
+		// a redirect from replaying the API key to another host.
+		http: &http.Client{Timeout: 3 * time.Minute, CheckRedirect: noCrossHostRedirect},
 	}, nil
 }
 
@@ -131,7 +132,7 @@ func (c *openAICompatible) Stream(ctx context.Context, req Request) (StreamResul
 		clientTokens int
 		gotFirst     bool
 	)
-	sc := bufio.NewScanner(resp.Body)
+	sc := bufio.NewScanner(io.LimitReader(resp.Body, maxStreamBytes))
 	sc.Buffer(make([]byte, 0, 64*1024), 1024*1024)
 	for sc.Scan() {
 		line := sc.Text()

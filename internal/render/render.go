@@ -43,16 +43,16 @@ func Leaderboard(rep *bench.Report) string {
 	rank := 0
 	for _, r := range rep.Results {
 		if !r.OK {
-			b.WriteString(fmt.Sprintf("| — | %s | `%s` | failed | — | — | — | %s | %d/%d |\n",
-				r.Provider, r.Model, costLabel(r), r.SuccessfulRuns, r.TotalRuns))
+			fmt.Fprintf(&b, "| — | %s | `%s` | failed | — | — | — | %s | %d/%d |\n",
+				r.Provider, r.Model, costLabel(r), r.SuccessfulRuns, r.TotalRuns)
 			continue
 		}
 		rank++
-		b.WriteString(fmt.Sprintf("| %d | %s | `%s` | **%.1f** | %.0f | %s | %d | %s | %d/%d |\n",
+		fmt.Fprintf(&b, "| %d | %s | `%s` | **%.1f** | %.0f | %s | %d | %s | %d/%d |\n",
 			rank, r.Provider, r.Model, r.TokensPerSecond, r.TTFTMillis,
-			reasoningLabel(r.ReasoningApplied), r.OutputTokens, costLabel(r), r.SuccessfulRuns, r.TotalRuns))
+			reasoningLabel(r.ReasoningApplied), r.OutputTokens, costLabel(r), r.SuccessfulRuns, r.TotalRuns)
 	}
-	b.WriteString(fmt.Sprintf("\n_Total cost of this run: **$%.4f**._\n", rep.TotalCostUSD))
+	fmt.Fprintf(&b, "\n_Total cost of this run: **$%.4f**._\n", rep.TotalCostUSD)
 	return b.String()
 }
 
@@ -102,8 +102,8 @@ func UpdateReadme(readmePath string, rep *bench.Report) error {
 
 	var section strings.Builder
 	section.WriteString(beginMarker + "\n")
-	section.WriteString(fmt.Sprintf("_Last updated: **%s** (%s) · prompt capped at %d output tokens · median of %d runs._\n\n",
-		rep.GeneratedAt.Format("2006-01-02"), rep.ISOWeek, rep.MaxTokens, rep.MeasuredRuns))
+	fmt.Fprintf(&section, "_Last updated: **%s** (%s) · prompt capped at %d output tokens · median of %d runs._\n\n",
+		rep.GeneratedAt.Format("2006-01-02"), rep.ISOWeek, rep.MaxTokens, rep.MeasuredRuns)
 	section.WriteString(Leaderboard(rep))
 	section.WriteString("\n")
 

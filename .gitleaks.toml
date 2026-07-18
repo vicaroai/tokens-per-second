@@ -1,0 +1,13 @@
+# gitleaks config for the CI secret scan. Uses the built-in ruleset; the
+# allowlist below prevents false positives on files that legitimately contain
+# key-shaped example text (never real keys).
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Non-secret files with key-shaped example/pattern text"
+paths = [
+  '''\.env\.example$''',   # placeholder env with empty values
+  '''\.githooks/.*''',     # the pre-commit hook contains the detection patterns
+  '''\.gitleaks\.toml$''', # this file
+]

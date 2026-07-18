@@ -24,7 +24,7 @@ defaults:
   # (gpt-5-nano is the one exception — it only supports "minimal"; see below.)
   reasoning: none
   warmup_runs: 1       # discarded runs to prime connection/routing
-  measured_runs: 3     # measured runs; we report the median (per model)
+  measured_runs: 5     # measured runs; report the median (per model)
   timeout_seconds: 120
 
 providers:

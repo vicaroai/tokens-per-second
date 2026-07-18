@@ -6,26 +6,26 @@ and backed by a [documented methodology](docs/METHODOLOGY.md) — so they stay
 honest and comparable over time.
 
 <!-- BENCHMARK:BEGIN -->
-_Last updated: **2026-07-18** (2026-W29) · prompt capped at 512 output tokens · median of 3 runs._
+_Last updated: **2026-07-18** (2026-W29) · prompt capped at 512 output tokens · median of 5 runs._
 
 | Rank | Provider | Model | Tokens/sec | TTFT (ms) | Reasoning | Output tokens | Run cost | Runs |
 |-----:|----------|-------|-----------:|----------:|-----------|--------------:|---------:|:----:|
-| 1 | openai | `gpt-5.6-luna` | **170.1** | 331 | off | 512 | $0.0124 | 3/3 |
-| 2 | openai | `gpt-5.4-nano` | **147.1** | 319 | off | 512 | $0.0026 | 3/3 |
-| 3 | openai | `gpt-5.4-mini` | **140.9** | 428 | off | 512 | $0.0093 | 3/3 |
-| 4 | fireworks | `accounts/fireworks/models/minimax-m3` | **140.7** | 340 | off | 512 | $0.0026 | 3/3 |
-| 5 | openai | `gpt-5-nano` | **140.0** | 608 | minimal ⚠️ | 512 | $0.0008 | 3/3 |
-| 6 | openai | `gpt-5.6-terra` | **101.4** | 747 | off | 512 | $0.0310 | 3/3 |
-| 7 | anthropic | `claude-sonnet-5` | **97.0** | 864 | off | 512 | $0.0209 | 3/3 |
-| 8 | anthropic | `claude-haiku-4-5-20251001` | **90.4** | 987 | off | 512 | $0.0104 | 3/3 |
-| 9 | fireworks | `accounts/fireworks/models/deepseek-v4-pro` | **86.0** | 1000 | off | 512 | $0.0073 | 3/3 |
-| 10 | openai | `gpt-5.5` | **80.0** | 548 | off | 512 | $0.0621 | 3/3 |
-| 11 | anthropic | `claude-opus-4-8` | **63.4** | 1065 | off | 512 | $0.0522 | 3/3 |
-| 12 | deepseek | `deepseek-v4-pro` | **58.6** | 848 | off | 512 | $0.0018 | 3/3 |
-| 13 | fireworks | `accounts/fireworks/models/glm-5p2` | **46.2** | 866 | off | 512 | $0.0092 | 3/3 |
-| 14 | openai | `gpt-5.6-sol` | **45.0** | 1347 | off | 512 | $0.0621 | 3/3 |
+| 1 | openai | `gpt-5.6-luna` | **170.1** | 514 | off | 512 | $0.0186 | 5/5 |
+| 2 | openai | `gpt-5-nano` | **147.1** | 592 | minimal ⚠️ | 512 | $0.0012 | 5/5 |
+| 3 | openai | `gpt-5.4-mini` | **120.9** | 608 | off | 512 | $0.0140 | 5/5 |
+| 4 | openai | `gpt-5.4-nano` | **119.1** | 313 | off | 512 | $0.0039 | 5/5 |
+| 5 | fireworks | `accounts/fireworks/models/deepseek-v4-pro` | **114.9** | 171 | off | 512 | $0.0110 | 5/5 |
+| 6 | openai | `gpt-5.6-terra` | **112.0** | 735 | off | 512 | $0.0465 | 5/5 |
+| 7 | anthropic | `claude-haiku-4-5-20251001` | **104.2** | 573 | off | 512 | $0.0156 | 5/5 |
+| 8 | fireworks | `accounts/fireworks/models/minimax-m3` | **102.3** | 1840 | off | 512 | $0.0039 | 5/5 |
+| 9 | anthropic | `claude-sonnet-5` | **98.6** | 700 | off | 512 | $0.0313 | 5/5 |
+| 10 | openai | `gpt-5.5` | **84.4** | 616 | off | 512 | $0.0931 | 5/5 |
+| 11 | anthropic | `claude-opus-4-8` | **64.3** | 1571 | off | 512 | $0.0782 | 5/5 |
+| 12 | fireworks | `accounts/fireworks/models/glm-5p2` | **61.4** | 899 | off | 512 | $0.0138 | 5/5 |
+| 13 | deepseek | `deepseek-v4-pro` | **58.3** | 934 | off | 512 | $0.0027 | 5/5 |
+| 14 | openai | `gpt-5.6-sol` | **42.3** | 1045 | off | 512 | $0.0931 | 5/5 |
 
-_Total cost of this run: **$0.2846**._
+_Total cost of this run: **$0.4270**._
 
 <!-- BENCHMARK:END -->
 

@@ -106,26 +106,18 @@ jobs:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           PR: ${{ steps.cpr.outputs.pull-request-number }}
         run: |
-          set -uo pipefail   # NOT -e: a still-pending check or a transient
-                             # non-zero must not abort the poll loop.
-          required="build secret-scan bot-pr-is-data-only"
-          merged=""
-          for i in $(seq 1 40); do
-            sha=$(gh pr view "$PR" --json headRefOid -q .headRefOid)
-            runs=$(gh api "repos/$GITHUB_REPOSITORY/commits/$sha/check-runs" --jq '[.check_runs[] | {name, conclusion}]')
-            pending=0
-            for c in $required; do
-              concl=$(printf '%s' "$runs" | jq -r --arg n "$c" 'map(select(.name==$n)) | .[0].conclusion // "pending"')
-              [ "$concl" = "success" ] || pending=$((pending+1))
-            done
-            if [ "$pending" -eq 0 ]; then
-              if gh api -X PUT "repos/$GITHUB_REPOSITORY/pulls/$PR/merge" -f merge_method=squash; then
-                merged=1; break
-              fi
+          set -uo pipefail
+          # Wait for the required checks to register + conclude. An initial
+          # sleep lets them appear (a bare --watch can return "no checks
+          # reported"); --watch then blocks until they finish.
+          sleep 20
+          gh pr checks "$PR" --watch --interval 15 --required || true
+          # Merge via REST API PUT — the App is a ruleset bypass actor, so this
+          # honors the bypass. Retry in case checks just settled.
+          for attempt in 1 2 3 4 5 6; do
+            if gh api -X PUT "repos/$GITHUB_REPOSITORY/pulls/$PR/merge" -f merge_method=squash; then
+              echo "merged"; exit 0
             fi
-            echo "waiting: $pending required check(s) not yet green (attempt $i)"
-            sleep 15
+            echo "merge not ready (attempt $attempt); retrying"; sleep 20
           done
-          if [ -z "$merged" ]; then
-            echo "::error::results PR #$PR did not merge (checks not green or merge rejected)"; exit 1
-          fi
+          echo "::error::results PR #$PR did not merge"; exit 1

@@ -9,14 +9,38 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/vicaroai/tokens-per-second/internal/bench"
 )
 
+// cellEscape defends the public README markdown table against a provider/model
+// name that slipped past config validation (e.g. a hand-edited latest.json fed
+// to `tps render`). It neutralises the characters that would break a table row
+// or inject markup: pipes, angle brackets, backticks, and any newline.
+func cellEscape(s string) string {
+	s = strings.NewReplacer(
+		"|", "\\|",
+		"<", "&lt;",
+		">", "&gt;",
+		"`", "'",
+		"\n", " ",
+		"\r", " ",
+	).Replace(s)
+	return s
+}
+
+// isoWeekRe bounds the ISOWeek value that becomes a filename, so a Report
+// loaded from an untrusted latest.json can't drive a path traversal.
+var isoWeekRe = regexp.MustCompile(`^\d{4}-W\d{2}$`)
+
 // WriteResults writes latest.json and the per-week history snapshot under
 // resultsDir (typically benchmarks/results).
 func WriteResults(resultsDir string, rep *bench.Report) error {
+	if !isoWeekRe.MatchString(rep.ISOWeek) {
+		return fmt.Errorf("refusing to write: invalid iso_week %q", rep.ISOWeek)
+	}
 	if err := os.MkdirAll(filepath.Join(resultsDir, "history"), 0o755); err != nil {
 		return err
 	}
@@ -42,14 +66,15 @@ func Leaderboard(rep *bench.Report) string {
 	b.WriteString("|-----:|----------|-------|-----------:|----------:|-----------|--------------:|---------:|:----:|\n")
 	rank := 0
 	for _, r := range rep.Results {
+		provider, model := cellEscape(r.Provider), cellEscape(r.Model)
 		if !r.OK {
 			fmt.Fprintf(&b, "| — | %s | `%s` | failed | — | — | — | %s | %d/%d |\n",
-				r.Provider, r.Model, costLabel(r), r.SuccessfulRuns, r.TotalRuns)
+				provider, model, costLabel(r), r.SuccessfulRuns, r.TotalRuns)
 			continue
 		}
 		rank++
 		fmt.Fprintf(&b, "| %d | %s | `%s` | **%.1f** | %.0f | %s | %d | %s | %d/%d |\n",
-			rank, r.Provider, r.Model, r.TokensPerSecond, r.TTFTMillis,
+			rank, provider, model, r.TokensPerSecond, r.TTFTMillis,
 			reasoningLabel(r.ReasoningApplied), r.OutputTokens, costLabel(r), r.SuccessfulRuns, r.TotalRuns)
 	}
 	fmt.Fprintf(&b, "\n_Total cost of this run: **$%.4f**._\n", rep.TotalCostUSD)

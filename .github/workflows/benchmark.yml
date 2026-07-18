@@ -34,9 +34,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      # SHA-pinned: this job holds all four provider API keys + the PAT in env,
+      # so a compromised mutable action tag here would mean full credential
+      # exfiltration. Pin against that. (checkout v4 / setup-go v5.)
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff
         with:
           go-version: "1.25"
           cache: true

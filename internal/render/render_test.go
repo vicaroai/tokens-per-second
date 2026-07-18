@@ -72,6 +72,23 @@ func TestUpdateReadmeReplacesOnlyMarkedRegion(t *testing.T) {
 	}
 }
 
+func TestCellEscapeNeutralizesInjection(t *testing.T) {
+	// A model/provider name that slipped past config validation must not be
+	// able to break the table or inject markup into the public README.
+	in := "evil | [x](http://e.com)\n<img src=x>"
+	out := cellEscape(in)
+	// No raw '<', '>', or newline; and no UNescaped pipe (an escaped "\|" is
+	// fine and won't break the table).
+	for _, bad := range []string{"<", ">", "\n", "\r"} {
+		if strings.Contains(out, bad) {
+			t.Errorf("cellEscape left %q in output: %q", bad, out)
+		}
+	}
+	if strings.Contains(strings.ReplaceAll(out, "\\|", ""), "|") {
+		t.Errorf("cellEscape left an unescaped pipe: %q", out)
+	}
+}
+
 func TestUpdateReadmeMissingMarkers(t *testing.T) {
 	dir := t.TempDir()
 	readme := filepath.Join(dir, "README.md")

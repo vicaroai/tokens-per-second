@@ -10,22 +10,22 @@ _Last updated: **2026-07-18** (2026-W29) · prompt capped at 512 output tokens �
 
 | Rank | Provider | Model | Tokens/sec | TTFT (ms) | Reasoning | Output tokens | Run cost | Runs |
 |-----:|----------|-------|-----------:|----------:|-----------|--------------:|---------:|:----:|
-| 1 | openai | `gpt-5.6-luna` | **172.2** | 321 | off | 512 | $0.0124 | 3/3 |
-| 2 | fireworks | `accounts/fireworks/models/minimax-m3` | **143.3** | 243 | off | 512 | $0.0026 | 3/3 |
-| 3 | openai | `gpt-5.4-nano` | **141.2** | 303 | off | 512 | $0.0026 | 3/3 |
-| 4 | openai | `gpt-5.4-mini` | **126.9** | 303 | off | 512 | $0.0093 | 3/3 |
-| 5 | anthropic | `claude-haiku-4-5-20251001` | **118.0** | 730 | off | 512 | $0.0104 | 3/3 |
-| 6 | openai | `gpt-5-nano` | **117.1** | 513 | minimal ⚠️ | 512 | $0.0008 | 3/3 |
-| 7 | openai | `gpt-5.6-terra` | **114.0** | 634 | off | 512 | $0.0310 | 3/3 |
-| 8 | anthropic | `claude-sonnet-5` | **98.0** | 1102 | off | 512 | $0.0209 | 3/3 |
-| 9 | fireworks | `accounts/fireworks/models/deepseek-v4-pro` | **86.8** | 222 | off | 512 | $0.0073 | 3/3 |
-| 10 | openai | `gpt-5.5` | **82.4** | 450 | off | 512 | $0.0621 | 3/3 |
-| 11 | anthropic | `claude-opus-4-8` | **72.3** | 995 | off | 512 | $0.0522 | 3/3 |
-| 12 | deepseek | `deepseek-v4-pro` | **54.3** | 863 | off | 512 | $0.0018 | 3/3 |
-| 13 | fireworks | `accounts/fireworks/models/glm-5p2` | **49.5** | 1387 | off | 512 | $0.0092 | 3/3 |
-| 14 | openai | `gpt-5.6-sol` | **46.6** | 1112 | off | 512 | $0.0621 | 3/3 |
+| — | anthropic | `claude-haiku-4-5-20251001` | failed | — | — | — | — | 0/3 |
+| — | anthropic | `claude-opus-4-8` | failed | — | — | — | — | 0/3 |
+| — | anthropic | `claude-sonnet-5` | failed | — | — | — | — | 0/3 |
+| — | deepseek | `deepseek-v4-pro` | failed | — | — | — | — | 0/3 |
+| — | fireworks | `accounts/fireworks/models/deepseek-v4-pro` | failed | — | — | — | — | 0/3 |
+| — | fireworks | `accounts/fireworks/models/glm-5p2` | failed | — | — | — | — | 0/3 |
+| — | fireworks | `accounts/fireworks/models/minimax-m3` | failed | — | — | — | — | 0/3 |
+| — | openai | `gpt-5-nano` | failed | — | — | — | — | 0/3 |
+| — | openai | `gpt-5.4-mini` | failed | — | — | — | — | 0/3 |
+| — | openai | `gpt-5.4-nano` | failed | — | — | — | — | 0/3 |
+| — | openai | `gpt-5.5` | failed | — | — | — | — | 0/3 |
+| — | openai | `gpt-5.6-luna` | failed | — | — | — | — | 0/3 |
+| — | openai | `gpt-5.6-sol` | failed | — | — | — | — | 0/3 |
+| — | openai | `gpt-5.6-terra` | failed | — | — | — | — | 0/3 |
 
-_Total cost of this run: **$0.2846**._
+_Total cost of this run: **$0.0000**._
 
 <!-- BENCHMARK:END -->
 

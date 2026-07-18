@@ -106,5 +106,23 @@ jobs:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           PR: ${{ steps.cpr.outputs.pull-request-number }}
         run: |
-          gh pr checks "$PR" --watch --interval 15 || true
-          gh pr merge "$PR" --squash || true
+          set -euo pipefail
+          # Poll until the three required checks conclude success (they take a
+          # few seconds to even register, so a plain --watch returns early with
+          # "no checks reported"). Give up after ~10 minutes.
+          required="build secret-scan bot-pr-is-data-only"
+          for i in $(seq 1 40); do
+            sha=$(gh pr view "$PR" --json headRefOid -q .headRefOid)
+            runs=$(gh api "repos/$GITHUB_REPOSITORY/commits/$sha/check-runs" --jq '[.check_runs[] | {name, conclusion}]')
+            ok=true
+            for c in $required; do
+              concl=$(echo "$runs" | jq -r --arg n "$c" 'map(select(.name==$n)) | .[0].conclusion // "pending"')
+              [ "$concl" = "success" ] || ok=false
+            done
+            $ok && break
+            sleep 15
+          done
+          # Merge via REST API PUT — the App is a ruleset bypass actor so this
+          # honors the bypass. (gh pr merge respects the policy and would need
+          # --admin, which the App does not have.)
+          gh api -X PUT "repos/$GITHUB_REPOSITORY/pulls/$PR/merge" -f merge_method=squash

@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+# Pre-commit secret scan — blocks a commit that stages anything key-shaped.
+#
+# This repo talks to paid LLM APIs, so a leaked provider key in public history
+# is the worst-case failure. This hook is the last line of defence before a
+# commit lands. It is intentionally ZERO-DEPENDENCY (pure bash + git grep) so
+# every contributor gets it with no install; if `gitleaks` is present it runs
+# that too for deeper coverage.
+#
+# Install: `git config core.hooksPath .githooks`  (or run scripts/install-hooks.sh)
+# Bypass (use with care, e.g. a false positive): `git commit --no-verify`
+
+set -euo pipefail
+
+fail=0
+red() { printf '\033[31m%s\033[0m\n' "$1"; }
+
+# Patterns for real provider credentials. Anchored to the actual key shapes so
+# ordinary code/text doesn't trip them.
+patterns=(
+  'sk-[A-Za-z0-9_-]{20,}'               # OpenAI (sk-..., sk-proj-...)
+  'sk-ant-[A-Za-z0-9_-]{20,}'           # Anthropic
+  'fw_[A-Za-z0-9_-]{18,}'               # Fireworks
+  'AKIA[0-9A-Z]{16}'                    # AWS access key id
+  'gh[pousr]_[A-Za-z0-9]{30,}'          # GitHub tokens
+  '-----BEGIN [A-Z ]*PRIVATE KEY-----'  # private keys
+  'xox[baprs]-[A-Za-z0-9-]{10,}'        # Slack tokens
+)
+
+# Scan only STAGED additions (not the whole file, not context lines). The hook
+# and its docs contain the patterns themselves, so exclude them to avoid a
+# self-match false positive.
+staged_diff="$(git diff --cached --no-color --unified=0 -- . ':(exclude).githooks/*' ':(exclude)*secret*' || true)"
+added="$(printf '%s\n' "$staged_diff" | grep -E '^\+' | grep -Ev '^\+\+\+' || true)"
+
+for p in "${patterns[@]}"; do
+  # `-e "$p"` (not a bare arg) so a pattern starting with '-' (private keys) is
+  # treated as a pattern, not a grep flag.
+  if printf '%s\n' "$added" | grep -Eq -e "$p"; then
+    red "✖ Potential secret matching /$p/ is staged."
+    fail=1
+  fi
+done
+
+# Never let a real .env (not the example) be committed.
+if git diff --cached --name-only | grep -Eq '(^|/)\.env($|\.)' \
+   && ! git diff --cached --name-only | grep -Eq '\.env\.example$'; then
+  red "✖ A .env file is staged — API keys must never be committed."
+  fail=1
+fi
+
+# Deeper scan if gitleaks is installed (optional, not required).
+if command -v gitleaks >/dev/null 2>&1; then
+  if ! gitleaks protect --staged --no-banner >/dev/null 2>&1; then
+    red "✖ gitleaks flagged staged content."
+    fail=1
+  fi
+fi
+
+if [ "$fail" -ne 0 ]; then
+  red "Commit blocked by pre-commit secret scan."
+  echo "If this is a false positive, review carefully, then: git commit --no-verify"
+  exit 1
+fi
+exit 0

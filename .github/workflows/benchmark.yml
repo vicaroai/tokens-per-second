@@ -55,7 +55,12 @@ jobs:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           CRUSOE_API_KEY: ${{ secrets.CRUSOE_API_KEY }}
-        run: go run ./cmd/tps bench
+        run: |
+          go run ./cmd/tps bench
+          # The GitHub Pages site (docs/) is served in isolation and can't read
+          # ../benchmarks/results, so publish a copy of the results alongside it.
+          mkdir -p docs/data
+          cp benchmarks/results/latest.json docs/data/latest.json
 
       # Mint a short-lived token for the tokens-per-second-bot GitHub App. Its
       # PRs are authored by tokens-per-second-bot[bot] — a distinct identity from
@@ -95,6 +100,7 @@ jobs:
           add-paths: |
             benchmarks/results/**
             README.md
+            docs/data/latest.json
 
       # Direct squash-merge by the App, NOT --auto. GitHub's auto-merge queue
       # re-evaluates the review rule and ignores the ruleset bypass, so it would

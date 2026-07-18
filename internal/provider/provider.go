@@ -6,6 +6,8 @@ package provider
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
 	"time"
@@ -72,6 +74,12 @@ var registry = map[string]Factory{}
 // register wires a provider id to its factory. Called from adapter init().
 func register(id string, f Factory) { registry[id] = f }
 
+// maxStreamBytes caps how much of a streamed response we'll read. A malicious
+// or broken host (a base_url is config-editable) could otherwise stream forever
+// until the timeout, or report absurd token counts. 16 MB is far more than any
+// legitimate few-hundred-token completion.
+const maxStreamBytes = 16 << 20
+
 // secretLike matches token/key-shaped substrings (sk-…, fw_…, long bearer
 // blobs) so a verbose provider error can't carry a credential fragment into a
 // public commit or CI log.
@@ -84,11 +92,57 @@ func scrubError(s string) string {
 	return strings.TrimSpace(secretLike.ReplaceAllString(s, "[redacted]"))
 }
 
+// allowedHosts is the set of API hosts a base_url may point at. This is the
+// primary defence against credential exfiltration: models.yaml is edited by PR,
+// and the benchmark runs in CI with live API keys in the Authorization header —
+// so an unrestricted base_url would let a config PR redirect a real key to an
+// attacker's server. Adding a host here is a deliberate CODE change (reviewed via
+// CODEOWNERS), not a config change. Keep in sync with benchmarks/models.yaml.
+var allowedHosts = map[string]bool{
+	"api.openai.com":    true,
+	"api.anthropic.com": true,
+	"api.fireworks.ai":  true,
+	"api.deepseek.com":  true,
+}
+
+// noCrossHostRedirect blocks following a redirect to a different host. Go's
+// http.Client strips the "Authorization" header across hosts but NOT custom
+// auth headers like Anthropic's "x-api-key" — so an allowed host that returns
+// a 30x to an attacker would otherwise replay the key. These APIs don't need
+// redirects, so refuse any that change host.
+func noCrossHostRedirect(req *http.Request, via []*http.Request) error {
+	if len(via) > 0 && req.URL.Host != via[0].URL.Host {
+		return fmt.Errorf("refusing cross-host redirect to %q", req.URL.Host)
+	}
+	if len(via) >= 5 {
+		return fmt.Errorf("too many redirects")
+	}
+	return nil
+}
+
+// validateBaseURL enforces https:// and an allow-listed host.
+func validateBaseURL(baseURL string) error {
+	u, err := url.Parse(baseURL)
+	if err != nil {
+		return fmt.Errorf("invalid base_url %q: %w", baseURL, err)
+	}
+	if u.Scheme != "https" {
+		return fmt.Errorf("base_url %q must use https", baseURL)
+	}
+	if !allowedHosts[u.Host] {
+		return fmt.Errorf("base_url host %q is not allow-listed (add it to provider.allowedHosts via a reviewed code change)", u.Host)
+	}
+	return nil
+}
+
 // New builds the Client for the given provider id.
 func New(id, baseURL, apiKey string) (Client, error) {
 	f, ok := registry[id]
 	if !ok {
 		return nil, fmt.Errorf("unknown provider %q (no adapter registered)", id)
+	}
+	if err := validateBaseURL(baseURL); err != nil {
+		return nil, err
 	}
 	return f(id, baseURL, apiKey)
 }

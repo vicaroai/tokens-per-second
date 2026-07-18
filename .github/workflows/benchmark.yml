@@ -34,9 +34,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      # SHA-pinned: this job holds all four provider API keys + the PAT in env,
+      # so a compromised mutable action tag here would mean full credential
+      # exfiltration. Pin against that. (checkout v4 / setup-go v5.)
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff
         with:
           go-version: "1.25"
           cache: true
@@ -51,6 +54,18 @@ jobs:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         run: go run ./cmd/tps bench
 
+      # Mint a short-lived token for the tokens-per-second-bot GitHub App. Its
+      # PRs are authored by tokens-per-second-bot[bot] — a distinct identity from
+      # any human — so branch protection can require review for everyone while a
+      # ruleset lets ONLY this bot's data-only PR auto-merge. App tokens expire
+      # in ~1h and are scoped to Contents + Pull requests on this repo only.
+      - name: Mint App token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1
+        with:
+          app-id: ${{ secrets.TPS_BOT_APP_ID }}
+          private-key: ${{ secrets.TPS_BOT_APP_KEY }}
+
       - name: Open results PR
         id: cpr
         # Pinned to a commit SHA (not a moving tag) — this third-party action
@@ -58,11 +73,7 @@ jobs:
         # v6.1.0
         uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c
         with:
-          # The default GITHUB_TOKEN cannot open PRs — the vicaroai org blocks
-          # "Actions create/approve PRs" org-wide. A repo-scoped fine-grained
-          # PAT (secret BENCHMARK_PAT, Contents+PullRequests write only) sidesteps
-          # that without any org change.
-          token: ${{ secrets.BENCHMARK_PAT }}
+          token: ${{ steps.app-token.outputs.token }}
           commit-message: "bench: weekly tokens-per-second results"
           title: "bench: refresh tokens-per-second results"
           body: |
@@ -85,6 +96,6 @@ jobs:
       - name: Enable auto-merge on the results PR
         if: steps.cpr.outputs.pull-request-operation == 'created' || steps.cpr.outputs.pull-request-operation == 'updated'
         env:
-          GH_TOKEN: ${{ secrets.BENCHMARK_PAT }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           gh pr merge --squash --auto "${{ steps.cpr.outputs.pull-request-number }}" || true

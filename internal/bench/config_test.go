@@ -22,6 +22,7 @@ defaults:
   max_tokens: 128
   temperature: 0.0
   measured_runs: 3
+  timeout_seconds: 120
 providers:
   - id: openai
     base_url: "https://api.openai.com/v1"

@@ -92,6 +92,37 @@ providers:
       - name: accounts/fireworks/models/kimi-k2p6
         price: { input_per_m: 0.95, output_per_m: 4.00 }
 
+  - id: gemini
+    # Google Gemini via its OpenAI-compatible endpoint (streaming + usage +
+    # reasoning_effort all work, so it uses the shared OpenAI adapter). Model
+    # ids verified against the native /v1beta/models list; prices per Google's
+    # pricing page (paid tier, <=200k prompt). Pro is preview.
+    base_url: "https://generativelanguage.googleapis.com/v1beta/openai"
+    api_key_env: GEMINI_API_KEY
+    models:
+      - name: gemini-3.5-flash
+        price: { input_per_m: 1.50, output_per_m: 9.00 }
+      # Gemini 3.1 Pro rejects reasoning off ("only works in thinking mode",
+      # verified); "low" is its minimum. Its numbers include some reasoning.
+      - name: gemini-3.1-pro-preview
+        reasoning: low
+        price: { input_per_m: 2.00, output_per_m: 12.00 }
+      - name: gemini-3.1-flash-lite
+        price: { input_per_m: 0.25, output_per_m: 1.50 }
+
+  - id: crusoe
+    # Crusoe Managed Inference — OpenAI-compatible. Slugs + prices from Crusoe's
+    # published catalog (crusoe.ai/cloud/managed-inference).
+    base_url: "https://api.inference.crusoecloud.com/v1"
+    api_key_env: CRUSOE_API_KEY
+    # Reasoning off via chat_template_kwargs:{enable_thinking:false} (Crusoe is
+    # vLLM-based; reasoning_effort is rejected by GLM-5.2). Both inherit "none".
+    models:
+      - name: zai/GLM-5.2
+        price: { input_per_m: 1.40, output_per_m: 4.40 }
+      - name: deepseek-ai/DeepSeek-V4-Pro
+        price: { input_per_m: 1.74, output_per_m: 3.48 }
+
   - id: deepseek
     # DeepSeek — OpenAI-compatible /chat/completions API.
     # Model ids verified against GET /v1/models: deepseek-v4-pro, deepseek-v4-flash.

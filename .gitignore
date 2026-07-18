@@ -1,0 +1,17 @@
+# Secrets — provider API keys must NEVER be committed. Referenced by env only.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Go build output
+/tps
+/dist/
+*.test
+*.out
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/

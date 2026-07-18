@@ -1,0 +1,98 @@
+# models.yaml — the benchmark definition.
+#
+# THIS FILE IS THE SOURCE OF TRUTH for what gets benchmarked. It is edited by
+# humans via pull request. The weekly benchmark Action reads it, runs every
+# entry, and writes results to benchmarks/results/. The Action never edits
+# this file.
+#
+# Adding a model = one PR-reviewed entry below. No Go code change required.
+#
+# API keys are NEVER stored here — only the NAME of the environment variable
+# that holds the key (resolved at runtime from GitHub Actions secrets).
+
+# Shared prompt + sampling settings applied to every model unless overridden.
+defaults:
+  # The prompt sent to every model. Kept identical across models so the
+  # tokens/sec comparison is apples-to-apples. See docs/METHODOLOGY.md.
+  prompt: "Write a detailed, technical explanation of how a transformer neural network processes a sequence of tokens, from embedding through attention to output."
+  max_tokens: 512      # cap output so cost + duration are bounded and comparable
+  temperature: 0.0     # deterministic-ish; we measure speed, not creativity
+  # Reasoning OFF by default — we measure raw generation speed. Each adapter
+  # maps this to the provider's wire format, all verified against the live APIs:
+  #   OpenAI/Fireworks -> reasoning_effort:"none"
+  #   DeepSeek/Anthropic -> thinking:{type:"disabled"}
+  # (gpt-5-nano is the one exception — it only supports "minimal"; see below.)
+  reasoning: none
+  warmup_runs: 1       # discarded runs to prime connection/routing
+  measured_runs: 3     # measured runs; we report the median (per model)
+  timeout_seconds: 120
+
+providers:
+  - id: openai
+    # OpenAI-compatible /chat/completions streaming API.
+    # Model ids verified against GET /v1/models.
+    base_url: "https://api.openai.com/v1"
+    api_key_env: OPENAI_API_KEY
+    # price: USD per 1,000,000 tokens (input_per_m / output_per_m). Prices are
+    # HUMAN-MAINTAINED list prices — verify against the provider's pricing page
+    # and update via PR; they feed the run-cost estimate only.
+    models:
+      # The 5.6 family.
+      - name: gpt-5.6-luna
+        price: { input_per_m: 1.00, output_per_m: 6.00 }
+      - name: gpt-5.6-sol
+        price: { input_per_m: 5.00, output_per_m: 30.00 }
+      - name: gpt-5.6-terra
+        price: { input_per_m: 2.50, output_per_m: 15.00 }
+      - name: gpt-5.5
+        price: { input_per_m: 5.00, output_per_m: 30.00 }
+      - name: gpt-5.4-mini
+        price: { input_per_m: 0.75, output_per_m: 4.50 }
+      - name: gpt-5.4-nano
+        price: { input_per_m: 0.20, output_per_m: 1.25 }
+      # gpt-5-nano rejects reasoning_effort "none" (verified via API probe);
+      # "minimal" is its lowest supported level.
+      - name: gpt-5-nano
+        reasoning: minimal
+        price: { input_per_m: 0.05, output_per_m: 0.40 }
+
+  - id: anthropic
+    # Anthropic Messages streaming API (native, not OpenAI-compatible).
+    # Model ids verified against GET /v1/models.
+    base_url: "https://api.anthropic.com/v1"
+    api_key_env: ANTHROPIC_API_KEY
+    # Reasoning off via thinking:{type:"disabled"} (verified against the live
+    # API — it genuinely suppresses the thinking block). Inherits default "none".
+    models:
+      - name: claude-opus-4-8
+        price: { input_per_m: 5.00, output_per_m: 25.00 }
+      - name: claude-sonnet-5
+        # Introductory pricing through 2026-08-31; reverts to 3.00/15.00 after.
+        price: { input_per_m: 2.00, output_per_m: 10.00 }
+      - name: claude-haiku-4-5-20251001
+        price: { input_per_m: 1.00, output_per_m: 5.00 }
+
+  - id: fireworks
+    # Fireworks — OpenAI-compatible. Slugs verified against GET /v1/models
+    # (glm-5p2, deepseek-v4-pro confirmed on this account). minimax-m3 is
+    # requested explicitly; if the account can't serve it, it surfaces as a
+    # failure row rather than being silently dropped.
+    base_url: "https://api.fireworks.ai/inference/v1"
+    api_key_env: FIREWORKS_API_KEY
+    models:
+      - name: accounts/fireworks/models/glm-5p2
+        price: { input_per_m: 1.40, output_per_m: 4.40 }
+      - name: accounts/fireworks/models/deepseek-v4-pro
+        price: { input_per_m: 1.74, output_per_m: 3.48 }
+      - name: accounts/fireworks/models/minimax-m3
+        price: { input_per_m: 0.30, output_per_m: 1.20 }
+
+  - id: deepseek
+    # DeepSeek — OpenAI-compatible /chat/completions API.
+    # Model ids verified against GET /v1/models: deepseek-v4-pro, deepseek-v4-flash.
+    base_url: "https://api.deepseek.com/v1"
+    api_key_env: DEEPSEEK_API_KEY
+    models:
+      - name: deepseek-v4-pro
+        # Cache-miss input price; cached input is far cheaper (not modeled here).
+        price: { input_per_m: 0.435, output_per_m: 0.87 }

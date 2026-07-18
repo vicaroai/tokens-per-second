@@ -1,0 +1,70 @@
+name: CI
+
+# Fast gate on every PR and push to main: format, vet, lint, test, build.
+# The harness (Go code) is human-reviewed; this keeps it honest.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache: true
+
+      - name: gofmt
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "These files are not gofmt-ed:"; echo "$unformatted"; exit 1
+          fi
+
+      - name: go vet
+        run: go vet ./...
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          # Pin the linter version so a new release can't silently change the
+          # gate under us (reproducible CI on a public repo).
+          version: v2.1.6
+
+      - name: test
+        run: go test -race ./...
+
+      - name: build
+        run: go build ./...
+
+  # The benchmark bot auto-merges its PR, so enforce that such a PR only ever
+  # touches result data + the README — never code, workflows, or config. If a
+  # buggy or tampered run writes elsewhere, this fails the required check and
+  # blocks the auto-merge.
+  bot-pr-is-data-only:
+    if: github.event_name == 'pull_request' && github.head_ref == 'bench/auto-results'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Assert only data + README changed
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          changed=$(git diff --name-only "$BASE" "$HEAD")
+          echo "Changed files:"; echo "$changed"
+          bad=$(echo "$changed" | grep -vE '^(benchmarks/results/|README\.md$)' || true)
+          if [ -n "$bad" ]; then
+            echo "::error::benchmark PR modified non-data files:"; echo "$bad"; exit 1
+          fi
+          echo "OK — data-only."

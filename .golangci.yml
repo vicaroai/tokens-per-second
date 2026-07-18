@@ -1,0 +1,22 @@
+# golangci-lint config (v2 schema) — lean and standard for a public Go repo.
+version: "2"
+
+linters:
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - misspell
+    - revive
+  exclusions:
+    rules:
+      # Test files may skip a few checks for brevity.
+      - path: _test\.go
+        linters:
+          - errcheck
+
+formatters:
+  enable:
+    - gofmt

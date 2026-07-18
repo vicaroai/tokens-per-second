@@ -1,0 +1,4 @@
+# Benchmark results land here, written by the benchmark workflow:
+#   latest.json         — always the most recent run (source of truth)
+#   history/YYYY-Www.json — one immutable snapshot per week
+# These files are machine-generated; do not hand-edit.

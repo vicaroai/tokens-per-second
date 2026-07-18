@@ -86,6 +86,11 @@ providers:
         price: { input_per_m: 1.74, output_per_m: 3.48 }
       - name: accounts/fireworks/models/minimax-m3
         price: { input_per_m: 0.30, output_per_m: 1.20 }
+      # Kimi K2.6 (slug verified via GET /v1/models). Fireworks doesn't list a
+      # per-name price for it; this is the Moonshot reference rate and should be
+      # confirmed against Fireworks' actual billing.
+      - name: accounts/fireworks/models/kimi-k2p6
+        price: { input_per_m: 0.95, output_per_m: 4.00 }
 
   - id: deepseek
     # DeepSeek — OpenAI-compatible /chat/completions API.

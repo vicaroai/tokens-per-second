@@ -10,22 +10,22 @@ _Last updated: **2026-07-18** (2026-W29) · prompt capped at 512 output tokens �
 
 | Rank | Provider | Model | Tokens/sec | TTFT (ms) | Reasoning | Output tokens | Run cost | Runs |
 |-----:|----------|-------|-----------:|----------:|-----------|--------------:|---------:|:----:|
-| — | anthropic | `claude-haiku-4-5-20251001` | failed | — | — | — | — | 0/3 |
-| — | anthropic | `claude-opus-4-8` | failed | — | — | — | — | 0/3 |
-| — | anthropic | `claude-sonnet-5` | failed | — | — | — | — | 0/3 |
-| — | deepseek | `deepseek-v4-pro` | failed | — | — | — | — | 0/3 |
-| — | fireworks | `accounts/fireworks/models/deepseek-v4-pro` | failed | — | — | — | — | 0/3 |
-| — | fireworks | `accounts/fireworks/models/glm-5p2` | failed | — | — | — | — | 0/3 |
-| — | fireworks | `accounts/fireworks/models/minimax-m3` | failed | — | — | — | — | 0/3 |
-| — | openai | `gpt-5-nano` | failed | — | — | — | — | 0/3 |
-| — | openai | `gpt-5.4-mini` | failed | — | — | — | — | 0/3 |
-| — | openai | `gpt-5.4-nano` | failed | — | — | — | — | 0/3 |
-| — | openai | `gpt-5.5` | failed | — | — | — | — | 0/3 |
-| — | openai | `gpt-5.6-luna` | failed | — | — | — | — | 0/3 |
-| — | openai | `gpt-5.6-sol` | failed | — | — | — | — | 0/3 |
-| — | openai | `gpt-5.6-terra` | failed | — | — | — | — | 0/3 |
+| 1 | openai | `gpt-5.6-luna` | **175.3** | 362 | off | 512 | $0.0124 | 3/3 |
+| 2 | openai | `gpt-5.4-nano` | **155.4** | 380 | off | 512 | $0.0026 | 3/3 |
+| 3 | openai | `gpt-5.4-mini` | **138.6** | 345 | off | 512 | $0.0093 | 3/3 |
+| 4 | openai | `gpt-5-nano` | **125.7** | 516 | minimal ⚠️ | 512 | $0.0008 | 3/3 |
+| 5 | openai | `gpt-5.6-terra` | **109.1** | 733 | off | 512 | $0.0310 | 3/3 |
+| 6 | anthropic | `claude-haiku-4-5-20251001` | **99.3** | 785 | off | 512 | $0.0104 | 3/3 |
+| 7 | anthropic | `claude-sonnet-5` | **91.4** | 997 | off | 512 | $0.0209 | 3/3 |
+| 8 | fireworks | `accounts/fireworks/models/minimax-m3` | **87.2** | 1686 | off | 512 | $0.0026 | 3/3 |
+| 9 | fireworks | `accounts/fireworks/models/deepseek-v4-pro` | **73.8** | 228 | off | 512 | $0.0073 | 3/3 |
+| 10 | openai | `gpt-5.5` | **71.7** | 994 | off | 512 | $0.0621 | 3/3 |
+| 11 | anthropic | `claude-opus-4-8` | **62.8** | 1217 | off | 512 | $0.0522 | 3/3 |
+| 12 | deepseek | `deepseek-v4-pro` | **56.6** | 1193 | off | 512 | $0.0018 | 3/3 |
+| 13 | openai | `gpt-5.6-sol` | **52.1** | 813 | off | 512 | $0.0621 | 3/3 |
+| 14 | fireworks | `accounts/fireworks/models/glm-5p2` | **51.3** | 876 | off | 512 | $0.0092 | 3/3 |
 
-_Total cost of this run: **$0.0000**._
+_Total cost of this run: **$0.2846**._
 
 <!-- BENCHMARK:END -->
 

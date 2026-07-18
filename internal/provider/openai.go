@@ -17,7 +17,7 @@ import (
 // all three — they differ only in base_url, api key, and model names (all in
 // models.yaml). Register each id so config stays declarative.
 func init() {
-	for _, id := range []string{"openai", "fireworks", "deepseek", "gemini"} {
+	for _, id := range []string{"openai", "fireworks", "deepseek", "gemini", "crusoe"} {
 		register(id, newOpenAICompatible)
 	}
 }
@@ -53,10 +53,11 @@ func (c *openAICompatible) ID() string { return c.id }
 //   - DeepSeek's own API: a top-level thinking:{type:"enabled"|"disabled"}
 //
 // "none" means "reasoning off"; any other value is passed through as the
-// effort level (low/medium/high/...). An empty level leaves the request
-// untouched (provider default).
+// effort level (low/medium/high/...). An empty level — or the explicit
+// "default" — leaves the request untouched (no reasoning param), which some
+// models require (e.g. Crusoe's GLM-5.2 rejects reasoning_effort entirely).
 func (c *openAICompatible) applyReasoning(payload map[string]any, level string) string {
-	if level == "" {
+	if level == "" || level == "default" {
 		return "default"
 	}
 	if c.id == "deepseek" {
@@ -66,6 +67,17 @@ func (c *openAICompatible) applyReasoning(payload map[string]any, level string) 
 			return "none"
 		}
 		payload["thinking"] = map[string]any{"type": "enabled"}
+		return level
+	}
+	if c.id == "crusoe" {
+		// Crusoe is vLLM-based: reasoning is toggled via the chat template, not
+		// reasoning_effort (which GLM-5.2 rejects outright). enable_thinking:false
+		// genuinely suppresses reasoning (verified: reasoning_tokens drops to 0).
+		if level == "none" {
+			payload["chat_template_kwargs"] = map[string]any{"enable_thinking": false}
+			return "none"
+		}
+		payload["chat_template_kwargs"] = map[string]any{"enable_thinking": true}
 		return level
 	}
 	// OpenAI + Fireworks: reasoning_effort accepts "none" to disable.

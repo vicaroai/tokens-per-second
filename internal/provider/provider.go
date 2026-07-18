@@ -104,6 +104,7 @@ var allowedHosts = map[string]bool{
 	"api.fireworks.ai":                  true,
 	"api.deepseek.com":                  true,
 	"generativelanguage.googleapis.com": true, // Gemini OpenAI-compat endpoint
+	"api.inference.crusoecloud.com":     true, // Crusoe Managed Inference
 }
 
 // noCrossHostRedirect blocks following a redirect to a different host. Go's

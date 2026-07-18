@@ -110,6 +110,19 @@ providers:
       - name: gemini-3.1-flash-lite
         price: { input_per_m: 0.25, output_per_m: 1.50 }
 
+  - id: crusoe
+    # Crusoe Managed Inference — OpenAI-compatible. Slugs + prices from Crusoe's
+    # published catalog (crusoe.ai/cloud/managed-inference).
+    base_url: "https://api.inference.crusoecloud.com/v1"
+    api_key_env: CRUSOE_API_KEY
+    # Reasoning off via chat_template_kwargs:{enable_thinking:false} (Crusoe is
+    # vLLM-based; reasoning_effort is rejected by GLM-5.2). Both inherit "none".
+    models:
+      - name: zai/GLM-5.2
+        price: { input_per_m: 1.40, output_per_m: 4.40 }
+      - name: deepseek-ai/DeepSeek-V4-Pro
+        price: { input_per_m: 1.74, output_per_m: 3.48 }
+
   - id: deepseek
     # DeepSeek — OpenAI-compatible /chat/completions API.
     # Model ids verified against GET /v1/models: deepseek-v4-pro, deepseek-v4-flash.

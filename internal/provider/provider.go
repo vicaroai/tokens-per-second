@@ -99,10 +99,11 @@ func scrubError(s string) string {
 // attacker's server. Adding a host here is a deliberate CODE change (reviewed via
 // CODEOWNERS), not a config change. Keep in sync with benchmarks/models.yaml.
 var allowedHosts = map[string]bool{
-	"api.openai.com":    true,
-	"api.anthropic.com": true,
-	"api.fireworks.ai":  true,
-	"api.deepseek.com":  true,
+	"api.openai.com":                    true,
+	"api.anthropic.com":                 true,
+	"api.fireworks.ai":                  true,
+	"api.deepseek.com":                  true,
+	"generativelanguage.googleapis.com": true, // Gemini OpenAI-compat endpoint
 }
 
 // noCrossHostRedirect blocks following a redirect to a different host. Go's

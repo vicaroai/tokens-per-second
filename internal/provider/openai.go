@@ -17,7 +17,7 @@ import (
 // all three — they differ only in base_url, api key, and model names (all in
 // models.yaml). Register each id so config stays declarative.
 func init() {
-	for _, id := range []string{"openai", "fireworks", "deepseek"} {
+	for _, id := range []string{"openai", "fireworks", "deepseek", "gemini"} {
 		register(id, newOpenAICompatible)
 	}
 }

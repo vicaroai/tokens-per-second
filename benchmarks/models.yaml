@@ -92,6 +92,24 @@ providers:
       - name: accounts/fireworks/models/kimi-k2p6
         price: { input_per_m: 0.95, output_per_m: 4.00 }
 
+  - id: gemini
+    # Google Gemini via its OpenAI-compatible endpoint (streaming + usage +
+    # reasoning_effort all work, so it uses the shared OpenAI adapter). Model
+    # ids verified against the native /v1beta/models list; prices per Google's
+    # pricing page (paid tier, <=200k prompt). Pro is preview.
+    base_url: "https://generativelanguage.googleapis.com/v1beta/openai"
+    api_key_env: GEMINI_API_KEY
+    models:
+      - name: gemini-3.5-flash
+        price: { input_per_m: 1.50, output_per_m: 9.00 }
+      # Gemini 3.1 Pro rejects reasoning off ("only works in thinking mode",
+      # verified); "low" is its minimum. Its numbers include some reasoning.
+      - name: gemini-3.1-pro-preview
+        reasoning: low
+        price: { input_per_m: 2.00, output_per_m: 12.00 }
+      - name: gemini-3.1-flash-lite
+        price: { input_per_m: 0.25, output_per_m: 1.50 }
+
   - id: deepseek
     # DeepSeek — OpenAI-compatible /chat/completions API.
     # Model ids verified against GET /v1/models: deepseek-v4-pro, deepseek-v4-flash.

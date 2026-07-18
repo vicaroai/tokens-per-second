@@ -66,4 +66,8 @@ different API needs a small adapter in
 
 ## License
 
-[MIT](LICENSE) © Vicaro AI
+[MIT](LICENSE) © [Vicaro AI](https://vicaro.ai)
+
+---
+
+Maintained by the team at [vicaro.ai](https://vicaro.ai).

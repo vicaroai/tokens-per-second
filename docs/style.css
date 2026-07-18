@@ -151,6 +151,15 @@ td.mono { font-family: var(--mono); color: var(--text-dim); }
 
 /* ---- footer ---- */
 footer { margin-top: 48px; text-align: center; color: var(--text-muted); font-size: 0.83rem; }
+.gh-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 9px 18px; margin-bottom: 20px; border-radius: 999px;
+  background: var(--ink); color: #fff !important; font-weight: 600; font-size: 0.88rem;
+  border: 1px solid var(--ink) !important; text-decoration: none;
+  transition: transform .15s, box-shadow .15s;
+}
+.gh-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(20, 18, 28, 0.28); }
+.gh-btn img { filter: invert(1); }
 footer a { color: var(--text-dim); text-decoration: none; border-bottom: 1px solid transparent; }
 footer a:hover { color: var(--accent-strong); border-bottom-color: var(--accent); }
 footer .by { margin-top: 10px; }

@@ -97,7 +97,7 @@ jobs:
           fi
           # Every changed path must be result data or the README; any other
           # path fails the check (grep -v matching a bad line exits 0).
-          if echo "$changed" | grep -vE '^(benchmarks/results/|README\.md$)'; then
+          if echo "$changed" | grep -vE '^(benchmarks/results/|docs/data/latest\.json$|README\.md$)'; then
             echo "::error::benchmark PR modified non-data files (listed above)."; exit 1
           fi
           echo "OK — data-only."

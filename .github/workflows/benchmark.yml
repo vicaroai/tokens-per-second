@@ -106,23 +106,26 @@ jobs:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
           PR: ${{ steps.cpr.outputs.pull-request-number }}
         run: |
-          set -euo pipefail
-          # Poll until the three required checks conclude success (they take a
-          # few seconds to even register, so a plain --watch returns early with
-          # "no checks reported"). Give up after ~10 minutes.
+          set -uo pipefail   # NOT -e: a still-pending check or a transient
+                             # non-zero must not abort the poll loop.
           required="build secret-scan bot-pr-is-data-only"
+          merged=""
           for i in $(seq 1 40); do
             sha=$(gh pr view "$PR" --json headRefOid -q .headRefOid)
             runs=$(gh api "repos/$GITHUB_REPOSITORY/commits/$sha/check-runs" --jq '[.check_runs[] | {name, conclusion}]')
-            ok=true
+            pending=0
             for c in $required; do
-              concl=$(echo "$runs" | jq -r --arg n "$c" 'map(select(.name==$n)) | .[0].conclusion // "pending"')
-              [ "$concl" = "success" ] || ok=false
+              concl=$(printf '%s' "$runs" | jq -r --arg n "$c" 'map(select(.name==$n)) | .[0].conclusion // "pending"')
+              [ "$concl" = "success" ] || pending=$((pending+1))
             done
-            $ok && break
+            if [ "$pending" -eq 0 ]; then
+              if gh api -X PUT "repos/$GITHUB_REPOSITORY/pulls/$PR/merge" -f merge_method=squash; then
+                merged=1; break
+              fi
+            fi
+            echo "waiting: $pending required check(s) not yet green (attempt $i)"
             sleep 15
           done
-          # Merge via REST API PUT — the App is a ruleset bypass actor so this
-          # honors the bypass. (gh pr merge respects the policy and would need
-          # --admin, which the App does not have.)
-          gh api -X PUT "repos/$GITHUB_REPOSITORY/pulls/$PR/merge" -f merge_method=squash
+          if [ -z "$merged" ]; then
+            echo "::error::results PR #$PR did not merge (checks not green or merge rejected)"; exit 1
+          fi

@@ -39,6 +39,21 @@ secret in repo settings and wire it into
   `go build`. Run `go test ./...` and `gofmt -l .` before pushing.
 - Keep the harness simple and readable — this repo is public-facing.
 
+## Secret scanning (do this first)
+
+This repo talks to paid LLM APIs, so a leaked key is the worst-case mistake.
+Install the pre-commit secret-scan hook once after cloning:
+
+```bash
+scripts/install-hooks.sh      # sets core.hooksPath -> .githooks
+```
+
+It blocks any commit that stages a provider-key-shaped string or a real `.env`.
+CI also runs gitleaks server-side as an unbypassable backstop, so even without
+the hook a secret can't merge — but the hook catches it before it ever enters
+your local history. Never paste real keys into code, tests, or commit messages;
+keys belong only in a gitignored `.env` (local) or GitHub Actions secrets (CI).
+
 ## Local dev
 
 ```bash

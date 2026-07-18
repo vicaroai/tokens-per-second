@@ -12,6 +12,26 @@ permissions:
   contents: read
 
 jobs:
+  # Server-side secret scan — the pre-commit hook only protects contributors
+  # who installed it (and it can be bypassed with --no-verify), so CI runs
+  # gitleaks over the whole history as an unbypassable backstop. We install the
+  # gitleaks BINARY directly (free) rather than gitleaks-action, which requires
+  # a paid license on organization repos.
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install gitleaks
+        run: |
+          VERSION=8.28.0
+          curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v${VERSION}/gitleaks_${VERSION}_linux_x64.tar.gz" \
+            | tar -xz -C /usr/local/bin gitleaks
+          gitleaks version
+      - name: Scan
+        run: gitleaks detect --source . --config .gitleaks.toml --redact --verbose --no-banner
+
   build:
     runs-on: ubuntu-latest
     steps:
@@ -33,11 +53,12 @@ jobs:
         run: go vet ./...
 
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v6
+        # v7 of the action is required for golangci-lint v2 (our .golangci.yml).
+        uses: golangci/golangci-lint-action@v7
         with:
           # Pin the linter version so a new release can't silently change the
-          # gate under us (reproducible CI on a public repo).
-          version: v2.1.6
+          # gate under us. Must be built with Go >= our go.mod target (1.25).
+          version: v2.12.2
 
       - name: test
         run: go test -race ./...

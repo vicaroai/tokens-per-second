@@ -8,30 +8,30 @@ honest and comparable over time.
 ### 📊 [**View the interactive dashboard →**](https://vicaroai.github.io/tokens-per-second/)
 
 <!-- BENCHMARK:BEGIN -->
-_Last updated: **2026-07-18** (2026-W29) · prompt capped at 512 output tokens · median of 5 runs._
+_Last updated: **2026-07-20** (2026-W30) · prompt capped at 512 output tokens · median of 5 runs._
 
 | Rank | Provider | Model | Tokens/sec | TTFT (ms) | Reasoning | Output tokens | Run cost | Runs |
 |-----:|----------|-------|-----------:|----------:|-----------|--------------:|---------:|:----:|
-| 1 | gemini | `gemini-3.1-flash-lite` | **247.9** | 396 | off | 508 | $0.0046 | 5/5 |
-| 2 | crusoe | `zai/GLM-5.2` | **221.5** | 331 | off | 512 | $0.0138 | 5/5 |
-| 3 | gemini | `gemini-3.5-flash` | **177.0** | 585 | off | 508 | $0.0277 | 5/5 |
-| 4 | openai | `gpt-5.6-luna` | **159.7** | 635 | off | 512 | $0.0186 | 5/5 |
-| 5 | openai | `gpt-5.4-mini` | **158.0** | 304 | off | 512 | $0.0140 | 5/5 |
-| 6 | openai | `gpt-5.4-nano` | **145.6** | 321 | off | 512 | $0.0039 | 5/5 |
-| 7 | openai | `gpt-5-nano` | **129.6** | 443 | minimal ⚠️ | 512 | $0.0012 | 5/5 |
-| 8 | openai | `gpt-5.6-terra` | **112.0** | 570 | off | 512 | $0.0465 | 5/5 |
-| 9 | anthropic | `claude-haiku-4-5-20251001` | **104.4** | 719 | off | 512 | $0.0156 | 5/5 |
-| 10 | fireworks | `accounts/fireworks/models/minimax-m3` | **100.5** | 1444 | off | 512 | $0.0039 | 5/5 |
-| 11 | fireworks | `accounts/fireworks/models/deepseek-v4-pro` | **100.2** | 285 | off | 512 | $0.0110 | 5/5 |
-| 12 | fireworks | `accounts/fireworks/models/kimi-k2p6` | **97.5** | 170 | off | 512 | $0.0125 | 5/5 |
-| 13 | anthropic | `claude-sonnet-5` | **96.0** | 903 | off | 512 | $0.0313 | 5/5 |
-| 14 | openai | `gpt-5.5` | **85.1** | 557 | off | 512 | $0.0931 | 5/5 |
-| 15 | crusoe | `deepseek-ai/DeepSeek-V4-Pro` | **78.4** | 397 | off | 512 | $0.0110 | 5/5 |
-| 16 | fireworks | `accounts/fireworks/models/glm-5p2` | **71.8** | 379 | off | 512 | $0.0138 | 5/5 |
-| 17 | anthropic | `claude-opus-4-8` | **66.9** | 1135 | off | 512 | $0.0782 | 5/5 |
-| 18 | deepseek | `deepseek-v4-pro` | **55.9** | 829 | off | 512 | $0.0027 | 5/5 |
-| 19 | openai | `gpt-5.6-sol` | **47.2** | 869 | off | 512 | $0.0931 | 5/5 |
-| 20 | gemini | `gemini-3.1-pro-preview` | **3.4** | 5786 | low ⚠️ | 20 | $0.0018 | 5/5 |
+| 1 | gemini | `gemini-3.1-flash-lite` | **249.5** | 310 | off | 508 | $0.0046 | 5/5 |
+| 2 | crusoe | `zai/GLM-5.2` | **226.8** | 251 | off | 512 | $0.0138 | 5/5 |
+| 3 | openai | `gpt-5-nano` | **163.1** | 420 | minimal ⚠️ | 512 | $0.0012 | 5/5 |
+| 4 | gemini | `gemini-3.5-flash` | **158.5** | 569 | off | 508 | $0.0277 | 5/5 |
+| 5 | openai | `gpt-5.6-luna` | **149.4** | 581 | off | 512 | $0.0186 | 5/5 |
+| 6 | fireworks | `accounts/fireworks/models/minimax-m3` | **143.3** | 490 | off | 512 | $0.0039 | 5/5 |
+| 7 | openai | `gpt-5.4-nano` | **135.7** | 284 | off | 512 | $0.0039 | 5/5 |
+| 8 | openai | `gpt-5.4-mini` | **129.6** | 347 | off | 512 | $0.0140 | 5/5 |
+| 9 | openai | `gpt-5.6-terra` | **105.0** | 379 | off | 512 | $0.0465 | 5/5 |
+| 10 | anthropic | `claude-haiku-4-5-20251001` | **102.2** | 1254 | off | 512 | $0.0156 | 5/5 |
+| 11 | anthropic | `claude-sonnet-5` | **93.3** | 1071 | off | 512 | $0.0313 | 5/5 |
+| 12 | fireworks | `accounts/fireworks/models/kimi-k2p6` | **86.4** | 259 | off | 512 | $0.0125 | 5/5 |
+| 13 | crusoe | `deepseek-ai/DeepSeek-V4-Pro` | **73.2** | 435 | off | 512 | $0.0110 | 5/5 |
+| 14 | fireworks | `accounts/fireworks/models/glm-5p2` | **65.4** | 359 | off | 512 | $0.0138 | 5/5 |
+| 15 | fireworks | `accounts/fireworks/models/deepseek-v4-pro` | **65.1** | 382 | off | 512 | $0.0110 | 5/5 |
+| 16 | anthropic | `claude-opus-4-8` | **62.9** | 1292 | off | 512 | $0.0782 | 5/5 |
+| 17 | openai | `gpt-5.5` | **62.3** | 547 | off | 512 | $0.0931 | 5/5 |
+| 18 | deepseek | `deepseek-v4-pro` | **57.5** | 826 | off | 512 | $0.0027 | 5/5 |
+| 19 | openai | `gpt-5.6-sol` | **52.3** | 1232 | off | 512 | $0.0931 | 5/5 |
+| 20 | gemini | `gemini-3.1-pro-preview` | **3.9** | 5275 | low ⚠️ | 21 | $0.0018 | 5/5 |
 
 _Total cost of this run: **$0.4983**._
 
